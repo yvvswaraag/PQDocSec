@@ -18,12 +18,13 @@ def get_local_ip():
     return ip
 
 
-def broadcast_receiver(ip, port=5000, interval=3):
+def broadcast_receiver(ip, port=5050,name="Reciver", interval=3):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
     payload = {
         "type": "RECEIVER_AVAILABLE",
+        "name": name,
         "ip": ip,
         "port": port
     }
@@ -46,10 +47,10 @@ def listen_for_receiver(timeout=10):
         message = json.loads(data.decode())
 
         if message.get("type") == "RECEIVER_AVAILABLE":
-            return message["ip"], message["port"]
+            return message["ip"], message["port"], message["name"]
 
     except socket.timeout:
-        return None, None
+        return None, None, None
     finally:
         sock.close()
-    return None, None
+    return None, None, None

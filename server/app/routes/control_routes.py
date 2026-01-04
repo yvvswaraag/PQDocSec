@@ -40,7 +40,7 @@ def discover_receiver():
 
     if not ip:
         return jsonify({"error": "No receiver found"}), 404
-
+    print(f"Discovered receiver at {ip}:{port}")
     app_state.receiver_ip = ip
     app_state.receiver_port = port
 
@@ -55,11 +55,13 @@ def start_receiver():
     if app_state.role != "RECEIVER":
         return jsonify({"error": "Not in receiver mode"}), 403
 
+    data = request.get_json() or {}
+    name = data.get("name", "Receiver")
     ip = get_local_ip()
 
     thread = threading.Thread(
         target=broadcast_receiver,
-        args=(ip,),
+        args=(ip,5050,name),
         daemon=True
     )
     thread.start()
@@ -69,5 +71,5 @@ def start_receiver():
     return jsonify({
         "message": "Receiver broadcasting started",
         "ip": ip,
-        "port": 5000
+        "port": 5050
     })

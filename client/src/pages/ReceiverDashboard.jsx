@@ -8,7 +8,7 @@ export default function ReceiverDashboard() {
 
   const startBroadcast = async () => {
     setState("BROADCASTING");
-    const res = await localPost("/receiver/start");
+    const res = await localPost("/receiver/start", { name });
     setIp(res.ip);
     setState("WAITING"); // waiting for handshake
   };
@@ -42,7 +42,7 @@ export default function ReceiverDashboard() {
               Waiting for sender to connect
             </p>
             <div className="mt-6 animate-pulse text-indigo-400">
-              📡 Listening on {ip}:5000
+              📡 Listening on {ip}:5050
             </div>
           </>
         )}
