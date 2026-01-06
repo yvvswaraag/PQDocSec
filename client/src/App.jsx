@@ -10,6 +10,9 @@ import ReceiverDashboard from "./pages/ReceiverDashboard";
 import UploadFile from "./pages/UploadFile";
 import DownloadFile from "./pages/DownloadFile";
 
+import FileSentSuccess from "./pages/FileSentSuccess";
+import FileDownloadSuccess from "./pages/FileDownloadSuccess";
+
 export default function App() {
   const [role, setRole] = useState(null);
 
@@ -39,6 +42,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/filesent"
+          element={
+            <ProtectedRoute role={role} allowed={["SENDER"]}>
+              <FileSentSuccess />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Receiver-only */}
         <Route
@@ -55,6 +66,15 @@ export default function App() {
           element={
             <ProtectedRoute role={role} allowed={["RECEIVER"]}>
               <DownloadFile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/filedownload"
+          element={
+            <ProtectedRoute role={role} allowed={["RECEIVER"]}>
+              <FileDownloadSuccess />
             </ProtectedRoute>
           }
         />
