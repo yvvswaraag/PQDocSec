@@ -35,7 +35,8 @@ def decrypt_file_workflow(
     encrypted_aes_key,
     signature,
     rsa_private_key,
-    signer_public_key
+    signer_public_key,
+    decrypted_output_dir
 ):
     # 1. Hash encrypted file
     file_hash = sha256_hash_file(encrypted_file_path)
@@ -50,7 +51,7 @@ def decrypt_file_workflow(
     # 4. AES decrypt file
     decrypted_path = aes_decrypt_file(
         encrypted_file_path,
-        "decrypted_files",
+        decrypted_output_dir,
         aes_key
     )
 

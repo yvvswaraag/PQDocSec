@@ -85,7 +85,7 @@ def receiver_status():
         if 'rsa_public_key' in state.sender_info:
             app_state.peer_rsa_public_key = bytes.fromhex(state.sender_info['rsa_public_key'])
         if 'signature_public_key' in state.sender_info:
-            app_state.peer_signature_public_key = bytes.fromhex(state.sender_info['signature_public_key'])
+            app_state.peer_signature_public_key = state.sender_info['signature_public_key']
         
         return jsonify({
             "status": "READY",

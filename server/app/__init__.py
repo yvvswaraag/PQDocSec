@@ -4,6 +4,7 @@ from .config import Config
 
 def create_app():
     app = Flask(__name__)
+    app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
     app.config.from_object(Config)
 
     CORS(app)

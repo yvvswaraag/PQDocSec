@@ -104,17 +104,22 @@ def encrypt_file():
 @file_bp.route("/decrypt", methods=["POST"])
 def decrypt_file():
     # Receiver-only operation
-    if app_state.role != "RECEIVER":
-        return jsonify({"error": "Not in receiver mode"}), 403
+    # if app_state.role != "RECEIVER":
+    #     return jsonify({"error": "Not in receiver mode"}), 403
     
-    if "file" not in request.files:
-        return jsonify({"error": "Encrypted file missing"}), 400
-    
-    encrypted_file = request.files["file"]
+    # if "file" not in request.files:
+    #     print("files missing")
+    #     return jsonify({"error": "Encrypted file missing"}), 400
+  
+    encrypted_file = request.form.get("file")
     encrypted_aes_key = request.form.get("encrypted_aes_key")
+    # print("aes encrypt",encrypted_aes_key)
     signature = request.form.get("signature")
+    # print("signature", signature)
     original_filename = request.form.get("original_filename", "received_file.pdf")
     
+    if not encrypted_file:
+        return jsonify({"error": "Encrypted file missing"}), 400
     if not encrypted_aes_key or not signature:
         return jsonify({"error": "Missing key or signature"}), 400
     
@@ -125,7 +130,7 @@ def decrypt_file():
         return jsonify({"error": f"Failed to decode encrypted file: {str(e)}"}), 400
     
     # Save decoded encrypted file
-    encrypted_dir = current_app.config["encrypted_files"]
+    encrypted_dir = current_app.config["ENCRYPTED_FOLDER"]
     os.makedirs(encrypted_dir, exist_ok=True)
     encrypted_path = os.path.join(encrypted_dir, f"encrypted_{uuid.uuid4().hex}.enc")
     
@@ -145,8 +150,8 @@ def decrypt_file():
             encrypted_aes_key=bytes.fromhex(encrypted_aes_key),
             signature=bytes.fromhex(signature),
             rsa_private_key=rsa_private_key,
-            sender_signature_public_key=sender_signature_public_key,
-            decrypted_output_dir=current_app.config["decrypted_files"]
+            signer_public_key=sender_signature_public_key,
+            decrypted_output_dir=current_app.config["DECRYPTED_FOLDER"]
         )
         
         # Delete encrypted file after decryption
