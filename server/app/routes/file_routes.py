@@ -153,7 +153,7 @@ def send_file():
             }
 
             response = requests.post(
-                f"{receiver_ip}:{receiver_port}/decrypt",
+                f"{receiver_ip}/decrypt",
                 files=files,
                 data=data,
                 timeout=15
