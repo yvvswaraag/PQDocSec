@@ -2,6 +2,31 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { localPost, peerPost } from "../services/api";
 
+function base64ToUint8Array(base64) {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+function encryptedBase64ToFile(base64Data, originalFileName) {
+  const encryptedBytes = base64ToUint8Array(base64Data);
+
+  const encryptedBlob = new Blob([encryptedBytes], {
+    type: "application/octet-stream",
+  });
+
+  return new File(
+    [encryptedBlob],
+    originalFileName + ".enc",
+    { type: "application/octet-stream" }
+  );
+}
+
 export default function UploadFile() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [encryptedFile, setEncryptedFile] = useState(null);
@@ -136,10 +161,22 @@ export default function UploadFile() {
       setAnimationStep(5);
       
       try {
+       const encryptedFileObj = encryptedBase64ToFile(
+          encryptedFile,          // base64 string
+          selectedFile.name       // original filename
+        );
+
+        console.log("is File:", encryptedFileObj instanceof File);
+        console.log(
+          "Encrypted file size:",
+          (encryptedFileObj.size / (1024 * 1024)).toFixed(2),
+          "MB"
+        );
+
         const formData = new FormData();
         
         // Create a file object from encrypted file path (you'll need to handle this)
-        formData.append("encrypted_file", encryptedFile);
+        formData.append("file", encryptedFileObj);
         formData.append("encrypted_aes_key", encryptedAesKey);
         formData.append("signature", signature);
         formData.append("original_filename", selectedFile.name);
