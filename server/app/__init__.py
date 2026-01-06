@@ -9,7 +9,7 @@ def create_app():
 
     CORS(app)
 
-    
+    CORS(app, origins=["http://localhost:5173"])
     from .routes.file_routes import file_bp
     from .routes.health_routes import health_bp
     from app.routes.handshake_routes import handshake_bp

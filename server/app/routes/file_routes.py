@@ -109,6 +109,8 @@ def send_file():
     Sender backend → Receiver backend
     Sends encrypted file + encrypted AES key + signature
     """
+
+    # REQUIRED FIELDS
     data = request.get_json()
 
     if not data:
@@ -121,13 +123,8 @@ def send_file():
 
     signature = data.get("signature")
     encrypted_aes_key = data.get("encrypted_aes_key")
-    print("Sending file to receiver at:", receiver_ip)
-    print("Encrypted file name:", encrypted_file_name)
-    print("Encrypted AES key:", encrypted_aes_key)
-    print("Signature:", signature)
-    print("Original filename:", original_filename)
+   
     if not all([encrypted_file_name, encrypted_aes_key, signature, receiver_ip]):
-        print("Missing required fields in send_file")
         return jsonify({"error": "Missing required fields"}), 400
 
     # FULL PATH TO ENCRYPTED FILE
@@ -156,7 +153,7 @@ def send_file():
             }
 
             response = requests.post(
-                f"{receiver_ip}/decrypt",
+                f"{receiver_ip}:{receiver_port}/decrypt",
                 files=files,
                 data=data,
                 timeout=15
@@ -212,21 +209,24 @@ def decrypt_file():
     sender_signature_public_key = app_state.peer_signature_public_key
 
     if sender_signature_public_key is None:
+        print("key error")
         return jsonify({"error": "Sender public key not available"}), 400
 
-    try:
+    try: 
         decrypted_path = decrypt_file_workflow(
             encrypted_file_path=encrypted_path,
             encrypted_aes_key=bytes.fromhex(encrypted_aes_key),
             signature=bytes.fromhex(signature),
             rsa_private_key=rsa_private_key,
             signer_public_key=sender_signature_public_key,
-            decrypted_output_dir=current_app.config["DECRYPTED_FOLDER"]
+            decrypted_output_dir=current_app.config["DECRYPTED_FOLDER"],
+            original_filename = original_filename
         )
 
         os.remove(encrypted_path)
 
     except Exception as e:
+        print(str(e))
         return jsonify({"error": str(e)}), 400
 
     # (Optional UI demo)
@@ -254,7 +254,7 @@ def decrypt_file():
         "file_id": file_id
     }), 200
 
-@file_bp.route("/next-file", methods=["GET"])
+@file_bp.route("/next-file", methods=["POST"])
 def next_file():
     """Get next file from queue and delete from backend"""
     if app_state.role != "RECEIVER":

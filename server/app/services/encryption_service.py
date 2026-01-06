@@ -67,7 +67,7 @@ def aes_encrypt_file(input_path, output_dir):
 
     return encrypted_path, aes_key
 
-def aes_decrypt_file(encrypted_path, output_dir, aes_key):
+def aes_decrypt_file(encrypted_path, output_dir, aes_key,original_filename):
     """
     Decrypts AES-encrypted file
     """
@@ -89,7 +89,7 @@ def aes_decrypt_file(encrypted_path, output_dir, aes_key):
     unpadder = padding.PKCS7(128).unpadder()
     plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
 
-    decrypted_filename = os.path.basename(encrypted_path).replace(".enc", "")
+    decrypted_filename = original_filename
     decrypted_path = os.path.join(output_dir, "DEC_" + decrypted_filename)
 
     with open(decrypted_path, "wb") as f:
