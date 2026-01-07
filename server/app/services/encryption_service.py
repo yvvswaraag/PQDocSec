@@ -90,7 +90,7 @@ def aes_decrypt_file(encrypted_path, output_dir, aes_key,original_filename):
     plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
 
     decrypted_filename = original_filename
-    decrypted_path = os.path.join(output_dir, "DEC_" + decrypted_filename)
+    decrypted_path = os.path.join(output_dir,  decrypted_filename)
 
     with open(decrypted_path, "wb") as f:
         f.write(plaintext)

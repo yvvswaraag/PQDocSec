@@ -36,7 +36,7 @@ def start_receiver():
     data = request.get_json() or {}
     name = data.get("name", "Receiver")
     ip = get_local_ip()
-    port = 5050
+    port = 5051
 
     # Create shared state
     broadcast_state = BroadcastState()
@@ -65,7 +65,7 @@ def start_receiver():
         "message": "Receiver started: broadcasting and waiting for handshake",
         "name": name,
         "ip": ip,
-        "port": port
+        "port": 5050
     })
 
 
@@ -74,7 +74,7 @@ def receiver_status():
     """Poll this endpoint to check if handshake is received"""
     if app_state.role != "RECEIVER":
         return jsonify({"error": "Not in receiver mode"}), 403
-
+    print("Checking receiver status...")
     if not hasattr(app_state, 'broadcast_state'):
         return jsonify({"status": "NOT_STARTED"})
 
@@ -94,6 +94,7 @@ def receiver_status():
             "sender_name": state.sender_info["name"]
         })
     else:
+        print("Handshake not yet received.")
         return jsonify({"status": "WAITING"})
 
     

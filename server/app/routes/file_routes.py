@@ -177,6 +177,7 @@ def send_file():
             "error": "Failed to contact receiver",
             "details": str(e)
         }), 500
+
 @file_bp.route("/decrypt", methods=["POST"])
 def decrypt_file():
 
@@ -211,6 +212,8 @@ def decrypt_file():
     if sender_signature_public_key is None:
         print("key error")
         return jsonify({"error": "Sender public key not available"}), 400
+    
+    
 
     try: 
         decrypted_path = decrypt_file_workflow(
@@ -224,7 +227,7 @@ def decrypt_file():
         )
 
         os.remove(encrypted_path)
-
+        # print ("orginal filename:", original_filename)
     except Exception as e:
         print(str(e))
         return jsonify({"error": str(e)}), 400
@@ -239,10 +242,23 @@ def decrypt_file():
     app_state.received_files_queue = getattr(
         app_state, "received_files_queue", []
     )
+    # sender_public_key_pem = sender_signature_public_key.public_bytes(
+    #     encoding=serialization.Encoding.PEM,
+    #     format=serialization.PublicFormat.SubjectPublicKeyInfo
+    # ).decode("utf-8")
 
+    rsa_private_key_pem = rsa_private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    ).decode("utf-8")
     app_state.received_files_queue.append({
         "id": file_id,
         "filename": original_filename,
+        "encrypted_aes_key": encrypted_aes_key,
+        "signature": signature,
+        "sender_public_key": sender_signature_public_key,
+        "rsa_private_key": rsa_private_key_pem,
         "decrypted_file": decrypted_file_data,
         "file_size": file_size,
         "path": decrypted_path,
@@ -278,5 +294,9 @@ def next_file():
         "id": file_entry["id"],
         "filename": file_entry["filename"],
         "file_data": file_entry["decrypted_file"],
-        "file_size": file_entry["file_size"]
+        "file_size": file_entry["file_size"],
+         "encrypted_aes_key": file_entry["encrypted_aes_key"],
+        "signature": file_entry["signature"],
+        "sender_public_key": file_entry["sender_public_key"],
+        "rsa_private_key": file_entry["rsa_private_key"]
     }), 200
