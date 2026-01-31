@@ -5,4 +5,6 @@ class Config:
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "..", "uploads")
     ENCRYPTED_FOLDER = os.path.join(BASE_DIR, "..", "encrypted_files")
     DECRYPTED_FOLDER = os.path.join(BASE_DIR,"..","decrypted_files")
+    PQC_KEY_FOLDER = os.path.join(BASE_DIR, "..", "pqc_keys")
+
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 20 MB

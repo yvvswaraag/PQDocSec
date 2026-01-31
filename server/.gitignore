@@ -26,7 +26,9 @@ venv/
 /encrypted_files/*
 /decrypted_files/*
 /keys/*
+/pqc_keys/*
 temp.py
+bin/
 
 # # Keep folders but ignore contents
 /uploads/.gitkeep

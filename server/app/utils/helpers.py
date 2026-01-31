@@ -1,5 +1,11 @@
 from cryptography.hazmat.primitives import hashes
+import base64
 
+def bin_to_b64(data: bytes) -> str:
+    return base64.b64encode(data).decode("utf-8")
+
+def b64_to_bin(data: str) -> bytes:
+    return base64.b64decode(data.encode("utf-8")) 
 
 def sha256_hash_file(file_path):
     """

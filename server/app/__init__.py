@@ -14,10 +14,14 @@ def create_app():
     from .routes.health_routes import health_bp
     from app.routes.handshake_routes import handshake_bp
     from app.routes.control_routes import control_bp
+    from app.routes.pqc_file_routes import file_pqc_bp
+    from app.routes.pqc_handshake_routes import pqc_handshake_bp
     
     app.register_blueprint(file_bp)
     app.register_blueprint(health_bp)
     app.register_blueprint(handshake_bp)
     app.register_blueprint(control_bp)
+    app.register_blueprint(file_pqc_bp)
+    app.register_blueprint(pqc_handshake_bp)
 
     return app
