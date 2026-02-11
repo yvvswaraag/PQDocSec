@@ -11,6 +11,7 @@ export default function UploadFile() {
   const [aesKey, setAesKey] = useState(null);
   const [encryptedAesKey, setEncryptedAesKey] = useState(null);
   const [hash, setHash] = useState(null);
+  const [kyber_ct, setKyber_ct] = useState(null);
   const [signature, setSignature] = useState(null);
   const [receiverPublicKey, setReceiverPublicKey] = useState(null);
   const [senderPrivateKey, setSenderPrivateKey] = useState(null);
@@ -52,6 +53,7 @@ export default function UploadFile() {
         setAesKey(result.aes_key);
         setEncryptedAesKey(result.encrypted_aes_key);
         setHash(result.file_hash);
+        setKyber_ct(result.kyber_ciphertext)
         setSignature(result.signature);
         setReceiverPublicKey(result.receiver_public_key);
         setSenderPrivateKey(result.signature_private_key);
@@ -97,6 +99,7 @@ export default function UploadFile() {
         setAesKey(result.aes_key);
         setEncryptedAesKey(result.encrypted_aes_key);
         setHash(result.file_hash);
+        setKyber_ct(result.kyber_ciphertext)
         setSignature(result.signature);
         setReceiverPublicKey(result.receiver_public_key);
         setSenderPrivateKey(result.sender_private_key);
@@ -126,7 +129,7 @@ export default function UploadFile() {
     setTimeout(() => setAnimationStep(3), 4500);
     setTimeout(() => setAnimationStep(4), 6500);
 
-    setTimeout(async () => {
+    setTimeout(async () => {  
       setAnimationStep(5);
 
       try {
@@ -136,6 +139,7 @@ export default function UploadFile() {
           encrypted_aes_key: encryptedAesKey,
           signature: signature, // returned from /encrypt
           receiver_api:PEER_API ,
+          kyber_ciphertext:kyber_ct,
           original_filename: selectedFile.name
         };
         console.log("Sending payload:", payload);
