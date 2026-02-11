@@ -16,6 +16,7 @@ def create_app():
     from app.routes.control_routes import control_bp
     from app.routes.pqc_file_routes import file_pqc_bp
     from app.routes.pqc_handshake_routes import pqc_handshake_bp
+    from app.routes.pqc_control_routes import pqc_control_bp
     
     app.register_blueprint(file_bp)
     app.register_blueprint(health_bp)
@@ -23,5 +24,6 @@ def create_app():
     app.register_blueprint(control_bp)
     app.register_blueprint(file_pqc_bp)
     app.register_blueprint(pqc_handshake_bp)
+    app.register_blueprint(pqc_control_bp)
 
     return app

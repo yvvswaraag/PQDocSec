@@ -6,11 +6,11 @@ import { useNavigate } from "react-router-dom";
 export default function RoleSelector({ onRoleSelected }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
+  const pqc = "/pqc";
   const selectRole = async (role) => {
     try {
       setLoading(true);
-      await localPost("/role/select", { "role":role });
+      await localPost(`${pqc}/role/select`, { "role":role });
 
       const upper = role.toUpperCase();
       onRoleSelected(upper);
