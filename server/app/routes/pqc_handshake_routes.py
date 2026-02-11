@@ -183,7 +183,7 @@ def sender_handshake():
     receiver_ip = data.get("receiver_ip")
     receiver_port = data.get("receiver_port", 5050)
     sender_name = data.get("sender_name", "Sender")
-
+    print(f"Received handshake request for receiver {receiver_ip}:{receiver_port}")
     if not receiver_ip:
         return jsonify({"error": "Receiver IP required"}), 400
 
@@ -199,8 +199,8 @@ def sender_handshake():
         "port": sender_port,
         "dilithium_public_key": base64.b64encode(dilithium_pk).decode("utf-8")
     }
-
-    success = send_handshake(receiver_ip, receiver_port, payload)
+    print("Prepared handshake payload:", payload)
+    success = send_handshake(receiver_ip, receiver_port, sender_ip, sender_port, sender_name)
 
     if not success:
         return jsonify({"error": "Handshake failed"}), 500
