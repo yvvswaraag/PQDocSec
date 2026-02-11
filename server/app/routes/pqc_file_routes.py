@@ -20,28 +20,22 @@ from app.services.pqc_key_service import (
 # ------------------------------------------------------
 # Blueprint
 # ------------------------------------------------------
-
 file_pqc_bp = Blueprint("file_pqc", __name__)
-
 
 # ======================================================
 # SENDER: Encrypt file using PQC
 # ======================================================
-
 @file_pqc_bp.route("/pqc/encrypt", methods=["POST"])
 def pqc_encrypt_file():
-
     # if app_state.role != "SENDER":
     #     return jsonify({"error": "Not in sender mode"}), 403
-
+    
     if "file" not in request.files:
         return jsonify({"error": "File missing"}), 400
 
     uploaded_file = request.files["file"]
-
     upload_dir = current_app.config["UPLOAD_FOLDER"]
     os.makedirs(upload_dir, exist_ok=True)
-
     input_path = os.path.join(upload_dir, uploaded_file.filename)
     uploaded_file.save(input_path)
 
@@ -51,6 +45,12 @@ def pqc_encrypt_file():
     except Exception as e:
         print(f"Error during PQC encryption: {e}")
         return jsonify({"error": str(e)}), 500
+
+    # Delete original file after encryption
+    try:
+        os.remove(input_path)
+    except Exception as e:
+        print(f"Failed to delete original file: {e}")
 
     # Read encrypted file → base64
     with open(result["encrypted_file_path"], "rb") as f:
@@ -73,11 +73,14 @@ def pqc_encrypt_file():
 # ======================================================
 # SENDER → RECEIVER: Send encrypted file
 # ======================================================
-
 @file_pqc_bp.route("/pqc/send-file", methods=["POST"])
 def pqc_send_file():
-
+    """
+    Sender backend → Receiver backend
+    Sends encrypted file + Kyber ciphertext + Dilithium signature
+    """
     data = request.get_json()
+    
     if not data:
         return jsonify({"error": "Invalid JSON payload"}), 400
 
@@ -96,6 +99,7 @@ def pqc_send_file():
     ]):
         return jsonify({"error": "Missing required fields"}), 400
 
+    # Full path to encrypted file
     encrypted_path = os.path.join(
         current_app.config["ENCRYPTED_FOLDER"],
         encrypted_file_name
@@ -113,7 +117,7 @@ def pqc_send_file():
                     "application/octet-stream"
                 )
             }
-
+            
             form_data = {
                 "signature": signature,
                 "kyber_ciphertext": kyber_ciphertext,
@@ -127,6 +131,7 @@ def pqc_send_file():
                 timeout=20
             )
 
+        # Forward receiver response to sender UI
         if response.status_code != 200:
             return jsonify({
                 "error": "Receiver failed to decrypt",
@@ -149,13 +154,11 @@ def pqc_send_file():
 # ======================================================
 # RECEIVER: Decrypt file using PQC
 # ======================================================
-
 @file_pqc_bp.route("/pqc/decrypt", methods=["POST"])
 def pqc_decrypt_file():
-
     # if app_state.role != "RECEIVER":
     #     return jsonify({"error": "Not in receiver mode"}), 403
-
+    
     if "file" not in request.files:
         return jsonify({"error": "Encrypted file missing"}), 400
 
@@ -179,12 +182,12 @@ def pqc_decrypt_file():
     # Save encrypted file exactly as received
     encrypted_dir = current_app.config["ENCRYPTED_FOLDER"]
     os.makedirs(encrypted_dir, exist_ok=True)
-
     encrypted_path = os.path.join(
         encrypted_dir,
         f"recv_{uuid.uuid4().hex}.enc"
     )
-
+    
+    encrypted_file.stream.seek(0)
     with open(encrypted_path, "wb") as f:
         f.write(encrypted_file.read())
 
@@ -193,7 +196,6 @@ def pqc_decrypt_file():
         current_app.config["PQC_KEY_FOLDER"],
         "kyber_ct.bin"
     )
-
     with open(kyber_ct_path, "wb") as f:
         f.write(kyber_ct)
 
@@ -203,15 +205,71 @@ def pqc_decrypt_file():
             signature=signature,
             original_filename=original_filename
         )
+        
+        # Delete encrypted file after successful decryption
+        os.remove(encrypted_path)
+        
     except Exception as e:
+        print(f"Decryption error: {str(e)}")
         return jsonify({"error": str(e)}), 400
 
-    # Return decrypted file (UI/demo use)
+    # Read decrypted file for queue storage
     with open(decrypted_path, "rb") as f:
         decrypted_b64 = base64.b64encode(f.read()).decode("utf-8")
+    
+    file_size = os.path.getsize(decrypted_path)
+    file_id = str(uuid.uuid4())
+
+    # Initialize queue if not exists
+    if not hasattr(app_state, 'pqc_received_files_queue'):
+        app_state.pqc_received_files_queue = []
+
+    # Add to queue
+    app_state.pqc_received_files_queue.append({
+        "id": file_id,
+        "filename": original_filename,
+        "kyber_ciphertext": kyber_ct_b64,
+        "signature": signature_b64,
+        "decrypted_file": decrypted_b64,
+        "file_size": file_size,
+        "path": decrypted_path,
+        "status": "READY"
+    })
 
     return jsonify({
-        "message": "File decrypted successfully",
-        "filename": original_filename,
-        "file_data": decrypted_b64
+        "message": "File decrypted and stored",
+        "file_id": file_id
+    }), 200
+
+
+# ======================================================
+# RECEIVER: Get next file from queue
+# ======================================================
+@file_pqc_bp.route("/pqc/next-file", methods=["POST"])
+def pqc_next_file():
+    """Get next PQC-encrypted file from queue and delete from backend"""
+    if app_state.role != "RECEIVER":
+        return jsonify({"error": "Not in receiver mode"}), 403
+
+    if not hasattr(app_state, 'pqc_received_files_queue') or not app_state.pqc_received_files_queue:
+        return jsonify({"message": "No files available"}), 204  # No Content
+
+    # Get first file from queue
+    file_entry = app_state.pqc_received_files_queue.pop(0)
+    
+    # Delete file from disk
+    try:
+        if os.path.exists(file_entry["path"]):
+            os.remove(file_entry["path"])
+    except Exception as e:
+        print(f"Failed to delete file from disk: {e}")
+    
+    # Return entire file data
+    return jsonify({
+        "id": file_entry["id"],
+        "filename": file_entry["filename"],
+        "file_data": file_entry["decrypted_file"],
+        "file_size": file_entry["file_size"],
+        "kyber_ciphertext": file_entry["kyber_ciphertext"],
+        "signature": file_entry["signature"]
     }), 200

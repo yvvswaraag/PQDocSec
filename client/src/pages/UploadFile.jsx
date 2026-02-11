@@ -14,7 +14,7 @@ export default function UploadFile() {
   const [signature, setSignature] = useState(null);
   const [receiverPublicKey, setReceiverPublicKey] = useState(null);
   const [senderPrivateKey, setSenderPrivateKey] = useState(null);
-  
+  const pqc = "/pqc"
   const [encrypting, setEncrypting] = useState(false);
   const [sending, setSending] = useState(false);
   const [animationStep, setAnimationStep] = useState(0);
@@ -43,7 +43,7 @@ export default function UploadFile() {
         const formData = new FormData();
         formData.append("file", file);
         
-        const result = await localPost("/encrypt", formData,true);
+        const result = await localPost(pqc + "/encrypt", formData,true);
 
         setSelectedFile(file);
         setEncryptedFile(result.encrypted_file);
@@ -88,7 +88,7 @@ export default function UploadFile() {
         const formData = new FormData();
         formData.append("file", file);
         
-        const result = await localPost("/encrypt", formData, true);
+        const result = await localPost(pqc + "/encrypt", formData, true);
         
         setSelectedFile(file);
         setEncryptedFile(result.encrypted_file);
@@ -140,7 +140,7 @@ export default function UploadFile() {
         };
         console.log("Sending payload:", payload);
         const result = await localPost(
-          "/send-file",
+          pqc + "/send-file",
           payload,
           false,
         );

@@ -11,13 +11,13 @@ export default function ReceiverDashboard() {
   const [error, setError] = useState(null);
   const pollIntervalRef = useRef(null);
   const navigate = useNavigate();
-
+  const pqc = "/pqc"
   const startBroadcast = async () => {
     setState("BROADCASTING");
     setError(null);
     
     try {
-      const res = await localPost("/receiver/start", { name });
+      const res = await localPost(`${pqc}/receiver/start`, { name });
       setIp(res.ip);
       setState("WAITING");
       
@@ -34,7 +34,7 @@ export default function ReceiverDashboard() {
     
     pollIntervalRef.current = setInterval(async () => {
       try {
-        const status = await localGet("/receiver/status");
+        const status = await localGet(`${pqc}/receiver/status`);
         
         if (status.status === "READY") {
           clearInterval(pollIntervalRef.current);
@@ -67,7 +67,7 @@ export default function ReceiverDashboard() {
     setError(null);
     
     try {
-      const result = await localPost("/receiver/acknowledge", {
+      const result = await localPost(`${pqc}/receiver/acknowledge`, {
         sender_ip: senderInfo.ip,
         sender_port: senderInfo.port,
         receiver_name: name

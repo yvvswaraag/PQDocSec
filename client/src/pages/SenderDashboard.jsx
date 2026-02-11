@@ -10,7 +10,7 @@ export default function SenderDashboard() {
   const [error, setError] = useState(null);
   const pollIntervalRef = useRef(null);
   const navigate = useNavigate();
-
+  const pqc = "/pqc";
   const startSender = () => {
     if (name.trim()) {
       setSelfName(name);
@@ -23,7 +23,7 @@ export default function SenderDashboard() {
     setError(null);
     
     try {
-      const res = await localPost("/sender/discover");
+      const res = await localPost(`${pqc}/sender/discover`);
       
       if (!res.receiver_ip || !res.receiver_port) {
         throw new Error("Invalid receiver data: missing IP or port");
@@ -46,7 +46,7 @@ export default function SenderDashboard() {
     setError(null);
     
     try {
-      const result = await localPost("/sender/handshake", {
+      const result = await localPost(`${pqc}/sender/handshake`, {
         receiver_ip: receiver.receiver_ip,
         receiver_port: receiver.receiver_port,
         sender_name: name
@@ -69,7 +69,7 @@ export default function SenderDashboard() {
     
     pollIntervalRef.current = setInterval(async () => {
       try {
-        const status = await localGet("/sender/ack_status");
+        const status = await localGet(`{pqc}/sender/ack_status`);
         
         if (status.status === "ACKNOWLEDGED") {
           clearInterval(pollIntervalRef.current);

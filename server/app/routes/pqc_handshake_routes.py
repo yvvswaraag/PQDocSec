@@ -29,7 +29,7 @@ pqc_handshake_bp = Blueprint("pqc_handshake", __name__)
 # SENDER: Discover receiver
 # ==================================================
 
-@pqc_handshake_bp.route("/sender/discover", methods=["POST"])
+@pqc_handshake_bp.route("/pqc/sender/discover", methods=["POST"])
 def discover_receiver():
 
     if app_state.role != "SENDER":
@@ -56,7 +56,7 @@ def discover_receiver():
 # RECEIVER: Start broadcasting & listening
 # ==================================================
 
-@pqc_handshake_bp.route("/receiver/start", methods=["POST"])
+@pqc_handshake_bp.route("/pqc/receiver/start", methods=["POST"])
 def start_receiver():
 
     if app_state.role != "RECEIVER":
@@ -97,7 +97,7 @@ def start_receiver():
 # RECEIVER: Poll handshake status
 # ==================================================
 
-@pqc_handshake_bp.route("/receiver/status", methods=["GET"])
+@pqc_handshake_bp.route("/pqc/receiver/status", methods=["GET"])
 def receiver_status():
 
     if app_state.role != "RECEIVER":
@@ -130,7 +130,7 @@ def receiver_status():
 # RECEIVER → SENDER: Send acknowledgment (Kyber PK)
 # ==================================================
 
-@pqc_handshake_bp.route("/receiver/acknowledge", methods=["POST"])
+@pqc_handshake_bp.route("/pqc/receiver/acknowledge", methods=["POST"])
 def receiver_acknowledge():
 
     if app_state.role != "RECEIVER":
@@ -173,7 +173,7 @@ def receiver_acknowledge():
 # SENDER → RECEIVER: Send handshake (Dilithium PK)
 # ==================================================
 
-@pqc_handshake_bp.route("/sender/handshake", methods=["POST"])
+@pqc_handshake_bp.route("/pqc/sender/handshake", methods=["POST"])
 def sender_handshake():
 
     if app_state.role != "SENDER":
@@ -225,7 +225,7 @@ def sender_handshake():
 # SENDER: Poll acknowledgment status
 # ==================================================
 
-@pqc_handshake_bp.route("/sender/ack_status", methods=["GET"])
+@pqc_handshake_bp.route("/pqc/sender/ack_status", methods=["GET"])
 def sender_ack_status():
 
     if app_state.role != "SENDER":
