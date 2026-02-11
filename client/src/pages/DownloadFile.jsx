@@ -10,7 +10,7 @@ export default function DownloadFile() {
   const [currentFile, setCurrentFile] = useState(null);
   const pollIntervalRef = useRef(null);
   const navigate = useNavigate();
-
+const pqc = "/pqc"
   useEffect(() => {
     startPolling();
     return () => {
@@ -21,7 +21,7 @@ export default function DownloadFile() {
   const startPolling = () => {
     pollIntervalRef.current = setInterval(async () => {
       try {
-        const result = await localPost("/next-file", {});
+        const result = await localPost(pqc+"/next-file", {});
 
         if (!result) {
           setLoading(true);

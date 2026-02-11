@@ -154,6 +154,7 @@ def send_acknowledgment(sender_ip, sender_port, receiver_ip, receiver_port, rece
         "kyber_public_key": bin_to_b64(kyber_pk)
     }
 
+    print("sending",sender_ip, sender_port, "acknowledgment with payload:", payload)
     try:
         sock.sendto(
             json.dumps(payload).encode(),

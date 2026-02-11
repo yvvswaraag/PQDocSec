@@ -82,6 +82,7 @@ def pqc_send_file():
     data = request.get_json()
     
     if not data:
+        print("Invalid JSON payload received")
         return jsonify({"error": "Invalid JSON payload"}), 400
 
     receiver_api = data.get("receiver_api")
@@ -97,6 +98,7 @@ def pqc_send_file():
         kyber_ciphertext,
         original_filename
     ]):
+        print("Missing required fields in payload:", data)
         return jsonify({"error": "Missing required fields"}), 400
 
     # Full path to encrypted file

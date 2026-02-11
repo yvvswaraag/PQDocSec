@@ -69,7 +69,7 @@ export default function SenderDashboard() {
     
     pollIntervalRef.current = setInterval(async () => {
       try {
-        const status = await localGet(`{pqc}/sender/ack_status`);
+        const status = await localGet(`${pqc}/sender/ack_status`);
         
         if (status.status === "ACKNOWLEDGED") {
           clearInterval(pollIntervalRef.current);
